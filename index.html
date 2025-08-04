@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel | Easy_earnb 💼</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; background: #1e1e2f; color: white; padding: 20px; }
+    h2 { margin-bottom: 10px; }
+    .card { background: #2a2a40; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+    button { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; margin: 4px; }
+    .approve { background: #28a745; color: white; }
+    .reject { background: #dc3545; color: white; }
+  </style>
+</head>
+<body>
+  <h2>🔐 Admin Panel - Easy_earnb 💸</h2>
+
+  <div class="card">
+    <h3>📤 Pending Withdraw Requests</h3>
+    <div id="withdrawList">Loading...</div>
+  </div>
+
+  <div class="card">
+    <h3>👥 All Users</h3>
+    <div id="userList">Loading...</div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyClPpKTXIhPPcwxNhUMLjdbUVILsPCVvlc",
+      authDomain: "habijul-620aa.firebaseapp.com",
+      databaseURL: "https://habijul-620aa-default-rtdb.firebaseio.com",
+      projectId: "habijul-620aa",
+      appId: "1:86834522001:android:f078be11035d934b8f9c30"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Load Withdraw Requests
+    const withdrawList = document.getElementById("withdrawList");
+    db.ref("withdraw_requests").on("value", snap => {
+      withdrawList.innerHTML = "";
+      snap.forEach(child => {
+        const req = child.val();
+        const div = document.createElement("div");
+        div.innerHTML = `
+          🧑‍💼 <b>${req.userId}</b> | 💸 ${req.amount}৳ | 📱 ${req.number} (${req.method}) <br/>
+          🕓 ${new Date(req.timestamp).toLocaleString()} <br/>
+          <button class="approve" onclick="approve('${child.key}')">Approve</button>
+          <button class="reject" onclick="reject('${child.key}')">Reject</button>
+          <hr/>
+        `;
+        withdrawList.appendChild(div);
+      });
+    });
+
+    function approve(key) {
+      db.ref("withdraw_requests/" + key).remove();
+      alert("✅ Withdraw Approved");
+    }
+
+    function reject(key) {
+      db.ref("withdraw_requests/" + key).remove();
+      alert("❌ Withdraw Rejected");
+    }
+
+    // Load All Users
+    const userList = document.getElementById("userList");
+    db.ref("users").on("value", snap => {
+      userList.innerHTML = "";
+      snap.forEach(child => {
+        const user = child.val();
+        const div = document.createElement("div");
+        div.innerHTML = `
+          🧑 <b>${child.key}</b> | 💰 ${user.balance?.toFixed(2)}৳ | 🎯 ${user.adsWatchedToday || 0} ads today | 📊 Total: ${user.totalAds || 0}<br/>
+          👥 Ref Com: ${user.refCommission?.toFixed(2)} ৳
+          <hr/>
+        `;
+        userList.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>
